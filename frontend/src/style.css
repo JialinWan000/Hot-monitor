@@ -1,0 +1,101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 全局样式 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #00f0ff33 transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #00f0ff33, #ff00ff33);
+  border-radius: 3px;
+}
+
+/* 选中文本样式 */
+::selection {
+  background: #00f0ff33;
+  color: #00f0ff;
+}
+
+/* 链接样式 */
+a {
+  @apply text-cyber-primary hover:text-cyber-secondary transition-colors;
+}
+
+/* 卡片基础样式 */
+@layer components {
+  .cyber-card {
+    @apply bg-cyber-card border border-cyber-border rounded-lg p-4;
+    @apply hover:border-cyber-primary/30 transition-all duration-300;
+    @apply relative overflow-hidden;
+  }
+  
+  .cyber-card::before {
+    content: '';
+    @apply absolute top-0 left-0 w-full h-px;
+    background: linear-gradient(90deg, transparent, #00f0ff, transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  
+  .cyber-card:hover::before {
+    opacity: 1;
+  }
+  
+  .cyber-btn {
+    @apply px-4 py-2 rounded font-medium transition-all duration-200;
+    @apply bg-cyber-primary/10 text-cyber-primary border border-cyber-primary/30;
+    @apply hover:bg-cyber-primary/20 hover:border-cyber-primary hover:shadow-lg;
+    @apply active:scale-95;
+  }
+  
+  .cyber-btn-primary {
+    @apply cyber-btn bg-cyber-primary text-cyber-dark border-cyber-primary;
+    @apply hover:bg-cyber-primary/90 hover:shadow-cyber-primary/30;
+  }
+  
+  .cyber-btn-danger {
+    @apply cyber-btn bg-cyber-danger/10 text-cyber-danger border-cyber-danger/30;
+    @apply hover:bg-cyber-danger/20 hover:border-cyber-danger;
+  }
+  
+  .cyber-input {
+    @apply w-full px-4 py-2 rounded bg-cyber-darker border border-cyber-border;
+    @apply text-gray-100 placeholder-gray-500;
+    @apply focus:outline-none focus:border-cyber-primary focus:ring-1 focus:ring-cyber-primary/30;
+    @apply transition-all duration-200;
+  }
+  
+  .cyber-badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-medium;
+    @apply bg-cyber-primary/10 text-cyber-primary border border-cyber-primary/30;
+  }
+  
+  .cyber-glow {
+    @apply animate-glow;
+  }
+  
+  .cyber-gradient-text {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, #00f0ff, #ff00ff);
+  }
+}
+
+/* 背景网格效果 */
+body {
+  background-image: 
+    linear-gradient(rgba(0,240,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,240,255,0.02) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
