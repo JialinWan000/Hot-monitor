@@ -87,6 +87,7 @@ class KeywordResponse(KeywordBase):
     """
     id: int = Field(..., description="关键词唯一标识ID")
     is_active: bool = Field(..., description="是否启用监控")
+    match_count: int = Field(0, description="匹配到的热点数量")
     created_at: datetime = Field(..., description="创建时间")
     updated_at: datetime = Field(..., description="最后更新时间")
     
@@ -116,7 +117,7 @@ class HotspotBase(BaseModel):
     )
     source_url: Optional[str] = Field(
         None, 
-        max_length=1000, 
+        max_length=2000, 
         description="原文链接URL",
         json_schema_extra={"example": "https://news.ycombinator.com/item?id=123456"}
     )

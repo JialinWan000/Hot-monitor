@@ -164,12 +164,17 @@ class CrawlerManager:
         if existing.scalar_one_or_none():
             return  # 已存在，跳过
         
+        # 截断过长的 URL（最大2000字符）
+        source_url = crawl_result.source_url
+        if source_url and len(source_url) > 2000:
+            source_url = source_url[:2000]
+        
         # 创建热点记录
         hotspot = Hotspot(
-            title=crawl_result.title,
+            title=crawl_result.title[:500] if crawl_result.title else "",
             content=crawl_result.content,
             source=crawl_result.source,
-            source_url=crawl_result.source_url,
+            source_url=source_url,
             published_at=crawl_result.published_at,
         )
         

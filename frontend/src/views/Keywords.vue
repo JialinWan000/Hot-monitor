@@ -104,22 +104,22 @@ function getPriorityLabel(priority) {
     
     <!-- 统计信息 -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div class="cyber-card text-center">
-        <p class="text-2xl font-bold text-cyber-primary">{{ keywordsStore.keywords.length }}</p>
+      <div class="stat-card text-center">
+        <p class="text-2xl font-bold text-cyber-primary font-mono">{{ keywordsStore.keywords.length }}</p>
         <p class="text-sm text-gray-500">总关键词</p>
       </div>
-      <div class="cyber-card text-center">
-        <p class="text-2xl font-bold text-cyber-success">{{ keywordsStore.activeKeywords.length }}</p>
+      <div class="stat-card text-center">
+        <p class="text-2xl font-bold text-cyber-success font-mono">{{ keywordsStore.activeKeywords.length }}</p>
         <p class="text-sm text-gray-500">活跃监控</p>
       </div>
-      <div class="cyber-card text-center">
-        <p class="text-2xl font-bold text-cyber-warning">
+      <div class="stat-card text-center">
+        <p class="text-2xl font-bold text-cyber-warning font-mono">
           {{ keywordsStore.keywords.filter(k => k.priority === 'high' || k.priority === 'critical').length }}
         </p>
         <p class="text-sm text-gray-500">高优先级</p>
       </div>
-      <div class="cyber-card text-center">
-        <p class="text-2xl font-bold text-cyber-secondary">
+      <div class="stat-card text-center">
+        <p class="text-2xl font-bold text-cyber-secondary font-mono">
           {{ keywordsStore.keywords.reduce((sum, k) => sum + (k.match_count || 0), 0) }}
         </p>
         <p class="text-sm text-gray-500">总匹配数</p>
@@ -151,7 +151,7 @@ function getPriorityLabel(priority) {
         v-for="keyword in sortedKeywords"
         :key="keyword.id"
         :class="[
-          'cyber-card group transition-all duration-200',
+          'keyword-card group transition-all duration-300',
           !keyword.is_active && 'opacity-60'
         ]"
       >

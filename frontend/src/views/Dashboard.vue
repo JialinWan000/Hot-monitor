@@ -112,7 +112,7 @@ function formatTime(dateStr) {
       <div 
         v-for="(stat, index) in statCards" 
         :key="stat.label"
-        class="cyber-card group"
+        class="stat-card group"
         :style="{ animationDelay: `${index * 100}ms` }"
       >
         <div class="flex items-start justify-between">
@@ -187,31 +187,33 @@ function formatTime(dateStr) {
           <a
             v-for="hotspot in hotspotsStore.hotspots"
             :key="hotspot.id"
-            :href="hotspot.url"
+            :href="hotspot.source_url"
             target="_blank"
             :class="[
-              'block p-3 rounded-lg border transition-all duration-200',
-              'hover:border-cyber-primary/50 hover:bg-cyber-primary/5',
+              'block p-3 rounded-lg border transition-all duration-300 group hotspot-card-mini',
+              'hover:border-cyber-primary/50 hover:bg-cyber-primary/5 hover:shadow-lg hover:shadow-cyber-primary/10',
               hotspot.read 
                 ? 'border-cyber-border/50 opacity-70' 
                 : 'border-cyber-border bg-cyber-card'
             ]"
           >
             <div class="flex items-start gap-3">
-              <span class="text-xl flex-shrink-0">{{ getSourceIcon(hotspot.source) }}</span>
+              <span class="text-xl flex-shrink-0 group-hover:scale-110 transition-transform">{{ getSourceIcon(hotspot.source) }}</span>
               <div class="flex-1 min-w-0">
-                <h3 class="font-medium text-gray-200 truncate group-hover:text-cyber-primary">
+                <h3 class="font-medium text-gray-200 truncate group-hover:text-cyber-primary transition-colors">
                   {{ hotspot.title }}
                 </h3>
-                <p v-if="hotspot.summary" class="text-sm text-gray-500 mt-1 line-clamp-2">
-                  {{ hotspot.summary }}
+                <!-- AI 摘要 -->
+                <p v-if="hotspot.summary || hotspot.ai_analysis || hotspot.content" class="text-sm text-gray-400 mt-1 line-clamp-2">
+                  <span class="text-cyber-primary/80 text-xs">摘要:</span>
+                  {{ hotspot.summary || hotspot.ai_analysis || (hotspot.content ? hotspot.content.substring(0, 80) + '...' : '') }}
                 </p>
                 <div class="flex items-center gap-3 mt-2 text-xs text-gray-500">
-                  <span class="uppercase">{{ hotspot.source }}</span>
+                  <span class="uppercase text-cyber-secondary/80">{{ hotspot.source }}</span>
                   <span>•</span>
                   <span>{{ formatTime(hotspot.discovered_at) }}</span>
-                  <span v-if="hotspot.ai_score" class="ml-auto text-cyber-primary">
-                    AI评分: {{ hotspot.ai_score }}/10
+                  <span v-if="hotspot.score" class="ml-auto ai-score-mini">
+                    AI {{ Math.round(hotspot.score) }}分
                   </span>
                 </div>
               </div>

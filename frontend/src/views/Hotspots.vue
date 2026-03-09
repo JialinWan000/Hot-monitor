@@ -207,12 +207,12 @@ function formatTime(dateStr) {
       <a
         v-for="hotspot in filteredHotspots"
         :key="hotspot.id"
-        :href="hotspot.url"
+        :href="hotspot.source_url"
         target="_blank"
         @click="hotspotsStore.markAsRead(hotspot.id)"
         :class="[
-          'cyber-card block transition-all duration-200 hover:scale-[1.01]',
-          !hotspot.read && 'border-l-2 border-l-cyber-primary'
+          'hotspot-card cyber-card block transition-all duration-300 hover:scale-[1.02]',
+          !hotspot.read && 'border-l-2 border-l-cyber-primary unread-card'
         ]"
       >
         <div class="flex gap-4">
@@ -227,33 +227,41 @@ function formatTime(dateStr) {
               ]">
                 {{ hotspot.title }}
               </h3>
-              <span v-if="hotspot.ai_score" class="flex-shrink-0 cyber-badge">
-                AI {{ hotspot.ai_score }}/10
+              <span v-if="hotspot.score" class="flex-shrink-0 ai-score-badge">
+                <span class="score-glow"></span>
+                AI {{ Math.round(hotspot.score) }}分
               </span>
             </div>
             
-            <p v-if="hotspot.summary" class="text-sm text-gray-500 mt-2 line-clamp-2">
-              {{ hotspot.summary }}
-            </p>
+            <!-- AI 摘要 -->
+            <div v-if="hotspot.summary || hotspot.ai_analysis || hotspot.content" class="mt-2 p-2 rounded bg-cyber-darker/50 border border-cyber-border/30">
+              <p class="text-sm text-gray-300 line-clamp-2">
+                <span class="text-cyber-primary text-xs font-medium mr-1">[摘要]</span>
+                {{ hotspot.summary || hotspot.ai_analysis || (hotspot.content ? hotspot.content.substring(0, 100) + '...' : '暂无摘要') }}
+              </p>
+            </div>
             
             <div class="flex items-center gap-4 mt-3 text-xs text-gray-500">
               <span class="uppercase font-medium text-cyber-primary/80">
                 {{ hotspot.source }}
               </span>
               <span>{{ formatTime(hotspot.discovered_at) }}</span>
-              <span v-if="hotspot.matched_keywords?.length" class="flex items-center gap-1">
+              <span v-if="hotspot.keywords?.length" class="flex items-center gap-1 keyword-tag">
                 <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/>
                 </svg>
-                {{ hotspot.matched_keywords.join(', ') }}
+                {{ hotspot.keywords.map(k => k.keyword).join(', ') }}
               </span>
               <a 
-                :href="hotspot.url" 
+                :href="hotspot.source_url" 
                 target="_blank"
-                class="ml-auto text-cyber-primary hover:text-cyber-secondary"
+                class="ml-auto visit-link flex items-center gap-1"
                 @click.stop
               >
-                访问原文 →
+                <span>访问原文</span>
+                <svg class="w-3 h-3 transition-transform group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
               </a>
             </div>
           </div>

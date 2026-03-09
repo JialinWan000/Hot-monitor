@@ -65,15 +65,16 @@ class AIService:
     "score": <重要性评分0-100，基于内容的新闻价值、影响力、相关性>,
     "is_verified": <布尔值，内容是否看起来真实可信>,
     "is_fake": <布尔值，是否可能是假消息/谣言/标题党>,
-    "summary": "<50字以内的中文摘要>",
+    "summary": "<用中文概括这条新闻的核心内容，50-80字，让读者一眼了解发生了什么>",
     "analysis": "<100字以内的详细分析，说明为什么给出这个评分>",
     "tags": ["<相关标签1>", "<相关标签2>", "<相关标签3>"]
 }}
 
-注意：
-1. 如果内容涉及AI、大模型、科技突破等话题，给予较高评分
-2. 如果标题明显夸张、不实或是营销内容，标记为可能是假消息
-3. 标签应该包含技术领域、相关公司/产品名称等"""
+重要要求：
+1. summary 必须是中文，简洁概括新闻核心信息，即使原文是英文也要翻译成中文摘要
+2. 如果内容涉及AI、大模型、科技突破等话题，给予较高评分
+3. 如果标题明显夸张、不实或是营销内容，标记为可能是假消息
+4. 标签应该包含技术领域、相关公司/产品名称等"""
 
         try:
             client = cls.get_client()
@@ -120,13 +121,23 @@ class AIService:
     
     @classmethod
     def _default_result(cls, title: str, content: str) -> Dict[str, Any]:
-        """返回默认分析结果"""
+        """返回默认分析结果（未配置AI或分析失败时）"""
+        # 生成简短摘要描述
+        summary = ""
+        if content:
+            # 截取前100字符作为摘要
+            summary = content[:100].strip()
+            if len(content) > 100:
+                summary += "..."
+        else:
+            summary = title[:100] if title else "暂无摘要"
+            
         return {
             "score": 50,
             "is_verified": False,
             "is_fake": False,
-            "summary": content[:200] if content else title[:200],
-            "analysis": "自动分析",
+            "summary": summary,
+            "analysis": "（AI服务未配置，显示原文摘要）",
             "tags": [],
         }
     

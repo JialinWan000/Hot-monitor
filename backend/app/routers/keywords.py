@@ -7,9 +7,10 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status, Query, Path
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from ..database import get_db
-from ..models import Keyword
+from ..models import Keyword, KeywordHotspot
 from ..schemas import (
     KeywordCreate,
     KeywordUpdate,
@@ -20,6 +21,21 @@ from ..schemas import (
 router = APIRouter()
 
 
+def keyword_to_response(keyword: Keyword, match_count: int = 0) -> dict:
+    """将 Keyword 模型转换为响应 dict，包含 match_count"""
+    return {
+        "id": keyword.id,
+        "keyword": keyword.keyword,
+        "category": keyword.category,
+        "priority": keyword.priority,
+        "description": keyword.description,
+        "is_active": keyword.is_active,
+        "match_count": match_count,
+        "created_at": keyword.created_at,
+        "updated_at": keyword.updated_at,
+    }
+
+
 @router.get(
     "",
     response_model=List[KeywordResponse],
@@ -28,7 +44,7 @@ router = APIRouter()
 获取所有已添加的监控关键词列表，支持分页和过滤。
 
 **功能说明：**
-- 返回关键词的完整信息，包括ID、关键词内容、分类、优先级、描述、是否启用等
+- 返回关键词的完整信息，包括ID、关键词内容、分类、优先级、描述、是否启用、匹配热点数等
 - 支持通过 `active_only` 参数仅获取已启用的关键词
 - 结果按创建时间倒序排列（最新添加的在前）
 
@@ -46,14 +62,17 @@ async def get_keywords(
     active_only: bool = Query(False, description="是否仅返回已启用的关键词。True=仅活跃，False=全部"),
     db: AsyncSession = Depends(get_db)
 ):
-    query = select(Keyword)
+    # 使用 selectinload 加载关联的热点
+    query = select(Keyword).options(selectinload(Keyword.hotspots))
     if active_only:
         query = query.where(Keyword.is_active == True)
     query = query.offset(skip).limit(limit).order_by(Keyword.created_at.desc())
     
     result = await db.execute(query)
-    keywords = result.scalars().all()
-    return keywords
+    keywords = result.scalars().unique().all()
+    
+    # 转换为响应格式，包含 match_count
+    return [keyword_to_response(k, len(k.hotspots)) for k in keywords]
 
 
 @router.get(
@@ -82,13 +101,15 @@ async def get_keyword(
     keyword_id: int = Path(..., description="关键词ID，必须是有效的整数", ge=1, example=1),
     db: AsyncSession = Depends(get_db)
 ):
-    result = await db.execute(select(Keyword).where(Keyword.id == keyword_id))
+    result = await db.execute(
+        select(Keyword).options(selectinload(Keyword.hotspots)).where(Keyword.id == keyword_id)
+    )
     keyword = result.scalar_one_or_none()
     
     if not keyword:
         raise HTTPException(status_code=404, detail="关键词不存在")
     
-    return keyword
+    return keyword_to_response(keyword, len(keyword.hotspots))
 
 
 @router.post(
@@ -145,7 +166,7 @@ async def create_keyword(
     await db.commit()
     await db.refresh(keyword)
     
-    return keyword
+    return keyword_to_response(keyword, 0)
 
 
 @router.put(
@@ -199,9 +220,14 @@ async def update_keyword(
         setattr(keyword, field, value)
     
     await db.commit()
-    await db.refresh(keyword)
     
-    return keyword
+    # 重新加载并计算 match_count
+    result = await db.execute(
+        select(Keyword).options(selectinload(Keyword.hotspots)).where(Keyword.id == keyword_id)
+    )
+    keyword = result.scalar_one()
+    
+    return keyword_to_response(keyword, len(keyword.hotspots))
 
 
 @router.delete(
@@ -273,6 +299,11 @@ async def toggle_keyword(
     
     keyword.is_active = not keyword.is_active
     await db.commit()
-    await db.refresh(keyword)
     
-    return keyword
+    # 重新加载并计算 match_count
+    result = await db.execute(
+        select(Keyword).options(selectinload(Keyword.hotspots)).where(Keyword.id == keyword_id)
+    )
+    keyword = result.scalar_one()
+    
+    return keyword_to_response(keyword, len(keyword.hotspots))

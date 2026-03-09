@@ -40,7 +40,7 @@ class Hotspot(Base):
     content: Mapped[Optional[str]] = mapped_column(Text)
     summary: Mapped[Optional[str]] = mapped_column(Text)  # AI生成的摘要
     source: Mapped[str] = mapped_column(String(50), nullable=False)  # 来源平台
-    source_url: Mapped[Optional[str]] = mapped_column(String(1000))
+    source_url: Mapped[Optional[str]] = mapped_column(String(2000))
     
     # AI分析结果
     score: Mapped[Optional[float]] = mapped_column(Float)  # AI评分 0-100
